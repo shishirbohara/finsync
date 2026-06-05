@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SpaceType {
+  PERSONAL
+  TEAM
+}
+
+enum SpaceRole {
+  ADMIN
+  VIEWER
+}
+
+enum SpaceInvite {
+  PENDING
+  ACCEPTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String
+  isSuperAdmin Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  spaceUsers SpaceUser[]
+  expenses   Expense[]
+}
+
+model Space {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  type        SpaceType
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  spaceUsers SpaceUser[]
+  expenses   Expense[]
+  invites    Invite[]
+}
+
+model SpaceUser {
+  id String @id @default(cuid())
+
+  spaceId String
+  space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role SpaceRole
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, spaceId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses Expense[]
+}
+
+model Expense {
+  id     String   @id @default(cuid())
+  task   String
+  date   DateTime
+  amount Float
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  spaceId String
+  space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spaceId])
+  @@index([userId])
+  @@index([categoryId])
+}
+
+model Invite {
+  id    String @id @default(cuid())
+  email String
+
+  spaceId String
+  space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  status    SpaceInvite @default(PENDING)
+  token     String      @unique
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+
+  @@index([spaceId])
+  @@index([email])
+}
