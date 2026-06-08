@@ -1,8 +1,20 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, SignupDto } from './dto';
+import { GetUsersDto, LoginDto, SignupDto } from './dto';
 import { ApiResponse, successResponse } from 'src/common/response.util';
-import { AuthResponse } from './types/auth.types';
+import { AuthResponse, PaginatedUsers } from './types/auth.types';
+import type { UserProfile } from './types/auth.types';
+import { JwtGuard } from './guards/jwt.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -19,5 +31,22 @@ export class AuthController {
   async login(@Body() dto: LoginDto): Promise<ApiResponse<AuthResponse>> {
     const data = await this.authService.login(dto);
     return successResponse('Login successful', data);
+  }
+
+  @Get('users')
+  @UseGuards(JwtGuard)
+  async getUsers(
+    @Query() dto: GetUsersDto,
+  ): Promise<ApiResponse<PaginatedUsers>> {
+    const data = await this.authService.getUsers(dto);
+    return successResponse('Users fetched successfully', data);
+  }
+
+  @Get('me')
+  @UseGuards(JwtGuard)
+  async getMe(
+    @CurrentUser() user: UserProfile,
+  ): Promise<ApiResponse<UserProfile>> {
+    return successResponse('User fetched successfully', user);
   }
 }

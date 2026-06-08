@@ -5,8 +5,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, SignupDto } from './dto';
+import { GetUsersDto, LoginDto, SignupDto } from './dto';
 import * as argon2 from 'argon2';
+import { PaginatedUsers } from './types/auth.types';
 
 @Injectable()
 export class AuthService {
@@ -71,6 +72,30 @@ export class AuthService {
       },
       accessToken,
     };
+  }
+
+  async getUsers(dto: GetUsersDto): Promise<PaginatedUsers> {
+    const { page, limit } = dto;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          isSuperAdmin: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return { users, total, page, limit };
   }
 
   private signToken(userId: string, email: string): string {
