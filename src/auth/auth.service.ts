@@ -7,7 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetUsersDto, LoginDto, SignupDto } from './dto';
 import * as argon2 from 'argon2';
-import { PaginatedUsers } from './types/auth.types';
+import { PaginatedResult } from 'src/common/types/pagination.types';
+import { UserProfile } from './types/auth.types';
 
 @Injectable()
 export class AuthService {
@@ -74,7 +75,7 @@ export class AuthService {
     };
   }
 
-  async getUsers(dto: GetUsersDto): Promise<PaginatedUsers> {
+  async getUsers(dto: GetUsersDto): Promise<PaginatedResult<UserProfile>> {
     const { page, limit } = dto;
     const skip = (page - 1) * limit;
 
@@ -95,7 +96,7 @@ export class AuthService {
       this.prisma.user.count(),
     ]);
 
-    return { users, total, page, limit };
+    return { data: users, total, page, limit };
   }
 
   private signToken(userId: string, email: string): string {

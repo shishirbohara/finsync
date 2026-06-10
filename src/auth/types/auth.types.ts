@@ -10,11 +10,3 @@ export interface AuthResponse {
   user: AuthUser;
   accessToken: string;
 }
-
-export interface PaginatedUsers {
-  users: UserProfile[];
-  total: number;
-  page: number;
-  limit: number;
-}
-

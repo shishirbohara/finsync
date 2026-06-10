@@ -11,10 +11,11 @@ import {
 import { AuthService } from './auth.service';
 import { GetUsersDto, LoginDto, SignupDto } from './dto';
 import { ApiResponse, successResponse } from 'src/common/response.util';
-import { AuthResponse, PaginatedUsers } from './types/auth.types';
+import { AuthResponse } from './types/auth.types';
 import type { UserProfile } from './types/auth.types';
 import { JwtGuard } from './guards/jwt.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { PaginatedResult } from 'src/common/types/pagination.types';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +38,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   async getUsers(
     @Query() dto: GetUsersDto,
-  ): Promise<ApiResponse<PaginatedUsers>> {
+  ): Promise<ApiResponse<PaginatedResult<UserProfile>>> {
     const data = await this.authService.getUsers(dto);
     return successResponse('Users fetched successfully', data);
   }
