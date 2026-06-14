@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { CategoryModule } from './category/category.module';
 import { SpaceModule } from './space/space.module';
+import { ExpenseModule } from './expense/expense.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SpaceModule } from './space/space.module';
     AuthModule,
     CategoryModule,
     SpaceModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
